@@ -2,46 +2,44 @@ import validador from 'validator';
 
 class FormValidator {
 
-    constructor(validacoes) {
+    constructor(validacoes){
         this.validacoes = validacoes;
     }
 
-    valida(state) {
-
+    valida(state){
+        
         let validacao = this.valido();
 
         this.validacoes.forEach(regra => {
-            
-        
-            if (!validacao[regra.campo].isInvalid) {
-                const campoValor = state[regra.campo.toString()];
-                const args = regra.args || [];
-                const metodoValidacao = typeof regra.metodo === 'string' ?
-                    validador[regra.metodo] : regra.metodo;
 
-                if (metodoValidacao(campoValor, ...args, state) !== regra.validoQuando) {
-                    validacao[regra.campo] = { 
-                        isInvalid: true, 
-                        message: regra.mensagem 
-                    };
-                    validacao.isValid = false;
+                if(!validacao[regra.campo].isInvalid){
+                    const campoValor = state[regra.campo.toString()];
+                    const args = regra.agrs || [];
+                    const metodoValidacao = typeof regra.metodo === 'string' ?
+                        validador[regra.metodo] : regra.metodo;
 
+                    if(metodoValidacao(campoValor, ...args, state) !== regra.validoQuando){
+                        validacao[regra.campo] = {
+                            isInvalid: true,
+                            mensagem: regra.mensagem
+                        };
+                        validacao.isValid = false;
+
+                    }
                 }
-            }
-
-
         });
+    
         return validacao;
+
     }
-    valido() {
+
+    valido(){
         const validacao = {};
 
-        this.validacoes.map(regra => (
-            validacao[regra.campo] = { isInvalid: false, message: '' }
-        ));
-
-        return { isValid: true, ...validacao };
-
+        this.validacoes.map(regra => {
+            return validacao[regra.campo] = {isInvalid: false, mensagem:''}
+        });
+        return { isValid: true, ...validacao}
     }
 
 }

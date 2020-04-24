@@ -1,10 +1,15 @@
-import React, { Component } from 'react';
-import FormValidator from '../../utils/FormValidator';
-import PopUp from '../../PopUp'
+import React, { Component } from 'react'
+import TextField from '@material-ui/core/TextField'
+import Grid from '@material-ui/core/Grid'
+import Button from '@material-ui/core/Button'
+
+import FormValidator from '../../utils/FormValidator'
+// import PopUp from '../../utils/PopUp'
+import Toast from '../Toast/Toast'
 
 class Formulario extends Component {
     constructor(props) {
-        super(props);
+        super(props)
 
         this.validador = new FormValidator([
             {
@@ -17,98 +22,127 @@ class Formulario extends Component {
                 campo: 'livro',
                 metodo: 'isEmpty',
                 validoQuando: false,
-                mensagem: 'Entre com um nome de livro'
+                mensagem: 'Entre com um livro'
             },
             {
                 campo: 'preco',
-                metodo: 'isEmpty',
-                args: [{ min: 0, max: 9999 }],
-                validoQuando: false,
-                mensagem: 'Entre com um valor'
-            },
-
-        ]);
+                metodo: 'isInt',
+                args: [{ min: 0, max: 99999 }],
+                validoQuando: true,
+                mensagem: 'Entre com um valor numérico'
+            }
+        ])
 
         this.stateInicial = {
             nome: '',
             livro: '',
             preco: '',
-            validacao: this.validador.valido()
+            validacao: this.validador.valido(),
+            mensagem: {
+                open: false,
+                texto: '',
+                tipo: ''
+            }
         }
-        this.state = this.stateInicial;
+
+        this.state = this.stateInicial
     }
 
     escutadorDeInput = event => {
-        const { name, value } = event.target;
+        const { name, value } = event.target
 
         this.setState({
             [name]: value
-        });
+        })
     }
 
     submitFormulario = () => {
-        const validacao = this.validador.valida(this.state);
+        const validacao = this.validador.valida(this.state)
+
         if (validacao.isValid) {
-            this.props.escutadorDeSubmit(this.state);
-            this.setState(this.stateInicial);
+            this.props.escutadorDeSubmit(this.state)
+            this.setState(this.stateInicial)
         } else {
-            const { nome, livro, preco } = validacao;
-            const campos = [nome, livro, preco];
+            const { nome, livro, preco } = validacao
+            const campos = [nome, livro, preco]
             const camposInvalidos = campos.filter(elem => {
                 return elem.isInvalid
-            });
-            camposInvalidos.forEach(campo => {
-                PopUp.exibeMensagem('error', campo.message);
-            });
-           
+            })
+            const erros = camposInvalidos.reduce(
+                (erros, campo) => erros + campo.mensagem + '. ',
+                ''
+            )
+
+            this.setState({
+                mensagem: {
+                    mensagem: erros,
+                    tipo: 'error',
+                    open: true
+                }
+            })
         }
     }
 
     render() {
-        const { nome, livro, preco } = this.state;
+        const { nome, livro, preco } = this.state
 
         return (
-            <form>
-                <div className="row">
-                    <div className="input-field col s4">
-                        <label htmlFor="nome" className="input-field">Nome</label>
-                        <input
-                            className="Validate"
-                            id="nome"
-                            type="text"
-                            name="nome"
-                            value={nome}
-                            onChange={this.escutadorDeInput}
-                        />
-
-                    </div>
-                    <div className="input-field col s4">
-                        <label htmlFor="livro" className="input-field">Livro</label>
-                        <input
-                            className="Validate"
-                            id="livro"
-                            type="text"
-                            name="livro"
-                            value={livro}
-                            onChange={this.escutadorDeInput}
-                        />
-                    </div>
-                    <div className="input-field col s4">
-                        <label htmlFor="preco" className="input-field">Preço</label>
-                        <input
-                            className="Validate"
-                            id="preco"
-                            type="text"
-                            name="preco"
-                            value={preco}
-                            onChange={this.escutadorDeInput}
-                        />
-                    </div>
-                </div>
-                <button onClick={this.submitFormulario} type="button" className="waves-effect waves-light btn indigo darken-2">Salvar</button>
-            </form>
+            <>
+                <Toast
+                    open={this.state.mensagem.open}
+                    handleClose={() =>
+                        this.setState({ mensagem: { open: false } })
+                    }
+                    severity={this.state.mensagem.tipo}
+                >
+                    {this.state.mensagem.mensagem}
+                </Toast>
+                <form>
+                    <Grid container spacing={2} alignItems='center'>
+                        <Grid item>
+                            <TextField
+                                id='nome'
+                                label='Nome'
+                                name='nome'
+                                variant='outlined'
+                                value={nome}
+                                onChange={this.escutadorDeInput}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                id='livro'
+                                label='Livro'
+                                name='livro'
+                                variant='outlined'
+                                value={livro}
+                                onChange={this.escutadorDeInput}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <TextField
+                                id='preco'
+                                label='Preço'
+                                name='preco'
+                                variant='outlined'
+                                value={preco}
+                                onChange={this.escutadorDeInput}
+                            />
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={this.submitFormulario}
+                                type='button'
+                            >
+                                Salvar
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </form>
+            </>
         )
     }
 }
-
-export default Formulario;
+export default Formulario
