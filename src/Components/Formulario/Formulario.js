@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid'
 import Button from '@material-ui/core/Button'
 
 import FormValidator from '../../utils/FormValidator'
-// import PopUp from '../../utils/PopUp'
 import Toast from '../Toast/Toast'
 
 class Formulario extends Component {
